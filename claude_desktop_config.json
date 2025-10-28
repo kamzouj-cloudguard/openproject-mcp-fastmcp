@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "openproject-mcp": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "cwd": "/Users/kamzouj/Downloads/openproject-api/openproject-mcp-server",
+      "env": {
+        "OPENPROJECT_BASE_URL": "https://moe.ops.atlas-btp.fr",
+        "OPENPROJECT_API_KEY": "8427a18b6a4a06b66235004a3f497bb29dc9b7b115b88a94f2cc9d65e8dbff65",
+        "MCP_PORT": "3001",
+        "ENABLE_API_AUTH": "false",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

@@ -204,6 +204,51 @@ app.get("/openapi.json", (_req: Request, res: Response) => {
 });
 
 /**
+ * SSE endpoint for MCP protocol communication
+ */
+app.get("/sse", (req: Request, res: Response) => {
+  if (!mcpClient) {
+    res.status(503).json({
+      error: "MCP client not initialized",
+    });
+    return;
+  }
+
+  // Set SSE headers
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  // Send a keep-alive comment periodically
+  const keepAliveInterval = setInterval(() => {
+    res.write(": keep-alive\n\n");
+  }, 30000);
+
+  // Send initialization complete
+  res.write(
+    `data: ${JSON.stringify({
+      jsonrpc: "2.0",
+      id: 0,
+      result: {
+        protocolVersion: "2024-11-05",
+        capabilities: {},
+        serverInfo: {
+          name: "openproject-mcp-http-proxy",
+          version: "1.0.0",
+        },
+      },
+    })}\n\n`
+  );
+
+  // Cleanup on disconnect
+  req.on("close", () => {
+    clearInterval(keepAliveInterval);
+    res.end();
+  });
+});
+
+/**
  * Root endpoint
  */
 app.get("/", (_req: Request, res: Response) => {
@@ -214,6 +259,7 @@ app.get("/", (_req: Request, res: Response) => {
       health: "/health",
       tools: "/tools",
       toolCall: "/tools/{toolName}/call",
+      sse: "/sse",
       docs: "/api-docs",
       openapi: "/openapi.json",
     },
