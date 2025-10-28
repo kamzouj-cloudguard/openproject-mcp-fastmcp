@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
   openproject-mcp:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     image: openproject-mcp-fastmcp:latest
     container_name: openproject-mcp-server
     restart: unless-stopped
