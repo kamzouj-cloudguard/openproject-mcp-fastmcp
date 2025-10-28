@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  openproject-mcp:
+    image: openproject-mcp-fastmcp:latest
+    container_name: openproject-mcp-server
+    restart: unless-stopped
+
+    environment:
+      OPENPROJECT_BASE_URL: ${OPENPROJECT_BASE_URL}
+      OPENPROJECT_API_KEY: ${OPENPROJECT_API_KEY}
+      MCP_PORT: ${MCP_PORT:-8000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: production
+
+    ports:
+      - "${MCP_PORT:-8000}:8000"
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
