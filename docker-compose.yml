@@ -14,13 +14,15 @@ services:
       OPENPROJECT_API_KEY: ${OPENPROJECT_API_KEY}
       MCP_PORT: ${MCP_PORT:-8000}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENABLE_API_AUTH: ${ENABLE_API_AUTH:-false}
+      AUTH_TOKEN: ${AUTH_TOKEN}
       NODE_ENV: production
 
     ports:
-      - "${MCP_PORT:-8000}:8000"
+      - "${MCP_PORT:-8888}:${MCP_PORT:-8888}"
 
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${MCP_PORT:-8888}/health"]
       interval: 30s
       timeout: 10s
       retries: 3

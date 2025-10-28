@@ -8,11 +8,20 @@ const PORT = parseInt(process.env.MCP_PORT || "8000");
 const LOG_LEVEL = process.env.LOG_LEVEL || "info";
 const BASE_URL = process.env.OPENPROJECT_BASE_URL;
 const API_KEY = process.env.OPENPROJECT_API_KEY;
+const ENABLE_API_AUTH = process.env.ENABLE_API_AUTH?.toLowerCase() === "true";
+const AUTH_TOKEN = process.env.AUTH_TOKEN || "";
 
 // Validate environment
 if (!BASE_URL || !API_KEY) {
   console.error(
     "Missing required environment variables: OPENPROJECT_BASE_URL and OPENPROJECT_API_KEY"
+  );
+  process.exit(1);
+}
+
+if (ENABLE_API_AUTH && !AUTH_TOKEN) {
+  console.error(
+    "ENABLE_API_AUTH is true but AUTH_TOKEN is not set"
   );
   process.exit(1);
 }
@@ -27,6 +36,19 @@ app.use((_req: Request, _res: Response, next: NextFunction) => {
   }
   next();
 });
+
+// Authentication middleware (if enabled)
+if (ENABLE_API_AUTH) {
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    const token = _req.headers.authorization?.split(" ")[1];
+    
+    if (!token || token !== AUTH_TOKEN) {
+      return res.status(401).json({ error: "Unauthorized: Invalid or missing API token" });
+    }
+    
+    next();
+  });
+}
 
 // OpenAPI/Swagger spec
 const openApiSpec = {
